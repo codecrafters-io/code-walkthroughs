@@ -1,0 +1,10 @@
+title: How Redis binds to a port
+
+introduction_markdown: |
+  Let’s walk through the Redis source code and observe how a Redis server binds to a port as part of the boot process.
+
+author:
+  avatar: "https://github.com/rohitpaulk.png"
+  name: "Paul Kuruvilla"
+  designation: "CTO, CodeCrafters"
+  website: "https://rohitpaulk.com"
