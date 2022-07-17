@@ -1,15 +1,8 @@
-Redis is an open-source in-memory data store. It exposes a set of commands for managing and working with data, like 
-[`GET`][redis-get-command] and [`SET`][redis-set-command]. In this walkthrough, we'll look at how the [`PING`][redis-ping-command]
-command is implemented in the Redis source code. 
-
 The `PING` command is the simplest of all Redis commands. It always returns `PONG` as a response (that's not exactly true, as 
 you'll learn in this walkthrough). This command is often used to test if a connection is still alive, or to measure latency.
 
 The function that handles the `PING` command is [`pingCommand`][function-pingCommand]:
 
-[redis-ping-command]: https://redis.io/commands/ping
-[redis-get-command]: https://redis.io/commands/get
-[redis-set-command]: https://redis.io/commands/set
 [function-pingCommand]: https://github.com/redis/redis/blob/1e85b89aefe8e7e24a46bd1c8fb251fdab024b74/src/server.c#L4285
 
 ^^ referenced_code
@@ -165,6 +158,3 @@ highlighted_lines:8
     }
 }
 ```
-
-That's all for this walkthrough! If you'd like to see more posts like these for specific parts of the Redis codebase, 
-please [let me know on Twitter](https://twitter.com/RohitPaulK).
