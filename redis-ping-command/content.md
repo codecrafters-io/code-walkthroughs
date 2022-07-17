@@ -167,4 +167,4 @@ highlighted_lines:8
 ```
 
 That's all for this walkthrough! If you'd like to see more posts like these for specific parts of the Redis codebase, 
-please [let me know](https://twitter.com/RohitPaulK).
+please [let me know on Twitter](https://twitter.com/RohitPaulK).
