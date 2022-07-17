@@ -1,0 +1,12 @@
+title: How the Redis PING command is implemented
+
+introduction_markdown: |
+  Let’s walk through the Redis source code and observe how the PING command is implemented.
+
+author:
+  avatar: "https://github.com/rohitpaulk.png"
+  name: "Paul Kuruvilla"
+  designation: "CTO, CodeCrafters"
+  website: "https://rohitpaulk.com"
+
+#hacker_news_url: "https://news.ycombinator.com/item?id=32120445"
