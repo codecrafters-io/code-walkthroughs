@@ -6,7 +6,7 @@ description_markdown: |
 introduction_markdown: |
   Redis is an open-source in-memory data store. It exposes a set of commands for managing and working with data, like
   [`GET`][redis-get-command] and [`SET`][redis-set-command]. In this walkthrough, we'll dive into Redis's source code
-  and look at how a Redis server binds to a port as part of the boot proces..
+  and look at how a Redis server binds to a port as part of the boot process.
 
   [redis-get-command]: https://redis.io/commands/get
   [redis-set-command]: https://redis.io/commands/set
