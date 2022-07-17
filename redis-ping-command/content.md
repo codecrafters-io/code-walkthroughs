@@ -1,97 +1,170 @@
-When a Redis Server boots, one of the first functions that gets called is [`initServer`][function-initServer]. It is
-within this function that the Redis server binds to a port and starts listening for connections:
+Redis is an open-source in-memory data store. It exposes a set of commands for managing and working with data, like 
+[`GET`][redis-get-command] and [`SET`][redis-set-command]. In this walkthrough, we'll look at how the [`PING`][redis-ping-command]
+command is implemented in the Redis source code. 
 
-[function-initServer]: https://github.com/redis/redis/blob/1e85b89aefe8e7e24a46bd1c8fb251fdab024b74/src/server.c#L2391
+The `PING` command is the simplest of all Redis commands. It always returns `PONG` as a response (that's not exactly true, as 
+you'll learn in this walkthrough). This command is often used to test if a connection is still alive, or to measure latency.
 
-^^ referenced_code
-link:https://github.com/redis/redis/blob/1e85b89aefe8e7e24a46bd1c8fb251fdab024b74/src/server.c#L2391
-highlighted_lines:5,8
-```c
-void initServer(void) {
-    // ... 
-    
-    /* Open the TCP listening socket for the user commands. */
-    if (server.port != 0 && listenToPort(server.port,&server.ipfd) == C_ERR) {
-        exit(1);
-    }
-    if (server.tls_port != 0 && listenToPort(server.tls_port,&server.tlsfd) == C_ERR) {
-        exit(1);
-    }
-    
-    // ...
-}
-```
+The function that handles the `PING` command is [`pingCommand`][function-pingCommand]:
 
-If you take a a closer look at [`listenToPort`][function-listenToPort], you'll see that it delegates to two functions: [`anetTcpServer`][function-anetTcpServer] and
-[`anetTcp6Server`][function-anetTcp6Server]. These use [`listen`][unix-listen] from `sys/socket.h` under the hood.
-
-[function-anetTcp6Server]: https://github.com/redis/redis/blob/ef68deb3c2a4d6205ddc84141d4d84b6e53cbc1b/src/anet.c#L476
-[function-anetTcpServer]: https://github.com/redis/redis/blob/ef68deb3c2a4d6205ddc84141d4d84b6e53cbc1b/src/anet.c#L481
-[function-listenToPort]: https://github.com/redis/redis/blob/8203461120bf244e5c0576222c6aa5d986587bca/src/server.c#L2282
-[unix-listen]: https://man7.org/linux/man-pages/man2/listen.2.html
+[redis-ping-command]: https://redis.io/commands/ping
+[redis-get-command]: https://redis.io/commands/get
+[redis-set-command]: https://redis.io/commands/set
+[function-pingCommand]: https://github.com/redis/redis/blob/1e85b89aefe8e7e24a46bd1c8fb251fdab024b74/src/server.c#L4285
 
 ^^ referenced_code
-link:https://github.com/redis/redis/blob/8203461120bf244e5c0576222c6aa5d986587bca/src/server.c#L2282-L2322
-highlighted_lines:9,12
+link:https://github.com/redis/redis/blob/1e85b89aefe8e7e24a46bd1c8fb251fdab024b74/src/server.c#L4285
 ```c
-/* Initialize a set of file descriptors to listen to the specified 'port'
- * binding the addresses specified in the Redis server configuration.
- */
-int listenToPort(int port, socketFds *sfd) {
-    // ... 
+void pingCommand(client *c) {
+    /* The command takes zero or one arguments. */
+    if (c->argc > 2) {
+        addReplyErrorArity(c);
+        return;
+    }
     
-    if (strchr(addr,':')) {
-        /* Bind IPv6 address. */
-        sfd->fd[sfd->count] = anetTcp6Server(server.neterr,port,addr,server.tcp_backlog);
+    if (c->flags & CLIENT_PUBSUB && c->resp == 2) {
+        addReply(c,shared.mbulkhdr[2]);
+        addReplyBulkCBuffer(c,"pong",4);
+        if (c->argc == 1)
+            addReplyBulkCBuffer(c,"",0);
+        else
+            addReplyBulk(c,c->argv[1]);
     } else {
-        /* Bind IPv4 address. */
-        sfd->fd[sfd->count] = anetTcpServer(server.neterr,port,addr,server.tcp_backlog);
+        if (c->argc == 1)
+            addReply(c,shared.pong);
+        else
+            addReplyBulk(c,c->argv[1]);
+    }
+}
+```
+
+There's a lot to unpack here, let's tackle this step by step. 
+
+#### Step 1: Validate input
+
+In the first 4 lines, we check that the number of arguments given don't exceed what the the `PING` command allows.
+
+^^ referenced_code
+link:https://github.com/redis/redis/blob/1e85b89aefe8e7e24a46bd1c8fb251fdab024b74/src/server.c#L4285
+highlighted_lines:3,4,5,6
+```c
+void pingCommand(client *c) {
+    /* The command takes zero or one arguments. */
+    if (c->argc > 2) {
+        addReplyErrorArity(c);
+        return;
     }
     
     // ...
 }
 ```
 
-# Handling port updates
+Notice how it says "zero **or one** arguments" above? Although `PING` is mostly used without an argument, it also 
+supports an optional argument. If the argument is supplied, it responds with that argument instead of `PONG`. This is
+similar to what the [`ECHO`][redis-echo-command] command does.
 
-Fun fact: the port on a running Redis server can be updated without a restart!
+[redis-echo-command]: https://redis.io/commands/echo
 
-This can be done by running the [`CONFIG SET`][redis-config-set-command] command: `CONFIG SET port <new_port>`.
+#### Step 2: Respond
 
-The function that handles port updates is [`changeListenPort`][function-changeListenPort]:
+The implementation of `PING` differs depending on whether the client is in [Pub/Sub][redis-pubsub-mode] mode or not. Pub/Sub mode is a whole 
+topic of its own, so we'll skip that section for now and look at the `else` block.
 
-[redis-config-set-command]: https://redis.io/commands/config-set
-[function-changeListenPort]: https://github.com/redis/redis/blob/8203461120bf244e5c0576222c6aa5d986587bca/src/server.c#L6193-L6223
+[redis-pubsub-mode]: https://redis.io/docs/manual/pubsub/
 
 ^^ referenced_code
-link:https://github.com/redis/redis/blob/ef68deb3c2a4d6205ddc84141d4d84b6e53cbc1b/src/server.c#L6260-L6290
-highlighted_lines:3,6
+link:https://github.com/redis/redis/blob/1e85b89aefe8e7e24a46bd1c8fb251fdab024b74/src/server.c#L4285
+highlighted_lines:7,8,9,10,11,12
 ```c
-int changeListenPort(int port, socketFds *sfd, aeFileProc *accept_handler) {
-    /* Close old servers */
-    closeSocketListeners(sfd);
+void pingCommand(client *c) {
+    // Step 1: Validate Input
     
-    /* Bind to the new port */
-    if (listenToPort(port, &new_sfd) != C_OK) {
-        return C_ERR;
+    if (c->flags & CLIENT_PUBSUB && c->resp == 2) {
+        // Respond when running in Pub/Sub mode)
+    } else {
+        if (c->argc == 1)
+            // No arguments? Respond with PONG
+            addReply(c,shared.pong);
+        else
+            // One argument? Respond back with the same argument.
+            addReplyBulk(c,c->argv[1]);
     }
 }
 ```
 
-Not all config options can be updated like we saw with `port`. We can see why this is by looking at
-[`src/config.c`][file-src-config-c], which is where config options are defined.
+# Command Table
 
-[file-src-config-c]: https://github.com/redis/redis/blob/99a425d0f3b7b00896cb855d5de4ae93be1fe3f0/src/config.c#L3024
+We've seen how the `pingCommand` function works, but how does it get called in the first place?
+
+Definitions for all Redis commands are stored in [src/commands.c][file-src-commands-c]. 
+
+[file-src-commands-c]: https://github.com/redis/redis/blob/82b82035553cdbaf81983f91e0402edc8de764ab/src/commands.c
 
 ^^ referenced_code
-link:https://github.com/redis/redis/blob/99a425d0f3b7b00896cb855d5de4ae93be1fe3f0/src/config.c#L3022
-highlighted_lines:3
+link:https://github.com/redis/redis/blob/82b82035553cdbaf81983f91e0402edc8de764ab/src/commands.c#L7184
+highlighted_lines:10
 ```c
-/* Integer configs */
-createIntConfig("databases", NULL, IMMUTABLE_CONFIG, 1, INT_MAX, server.dbnum, 16, INTEGER_CONFIG, NULL, NULL),
-createIntConfig("port", NULL, MODIFIABLE_CONFIG, 0, 65535, server.port, 6379, INTEGER_CONFIG, NULL, updatePort),
+/* Main command table */
+struct redisCommand redisCommandTable[] = {
+    // ...
+
+    /* connection */
+    {"auth","Authenticate to the server","O(N) where N is the number of passwords defined for the user","1.0.0",CMD_DOC_NONE,NULL,NULL,COMMAND_GROUP_CONNECTION,AUTH_History,AUTH_tips,authCommand,-2,CMD_NOSCRIPT|CMD_LOADING|CMD_STALE|CMD_FAST|CMD_NO_AUTH|CMD_SENTINEL|CMD_ALLOW_BUSY,ACL_CATEGORY_CONNECTION,.args=AUTH_Args},
+    {"client","A container for client connection commands","Depends on subcommand.","2.4.0",CMD_DOC_NONE,NULL,NULL,COMMAND_GROUP_CONNECTION,CLIENT_History,CLIENT_tips,NULL,-2,CMD_SENTINEL,0,.subcommands=CLIENT_Subcommands},
+    {"echo","Echo the given string","O(1)","1.0.0",CMD_DOC_NONE,NULL,NULL,COMMAND_GROUP_CONNECTION,ECHO_History,ECHO_tips,echoCommand,2,CMD_LOADING|CMD_STALE|CMD_FAST,ACL_CATEGORY_CONNECTION,.args=ECHO_Args},
+    {"hello","Handshake with Redis","O(1)","6.0.0",CMD_DOC_NONE,NULL,NULL,COMMAND_GROUP_CONNECTION,HELLO_History,HELLO_tips,helloCommand,-1,CMD_NOSCRIPT|CMD_LOADING|CMD_STALE|CMD_FAST|CMD_NO_AUTH|CMD_SENTINEL|CMD_ALLOW_BUSY,ACL_CATEGORY_CONNECTION,.args=HELLO_Args},
+    {"ping","Ping the server","O(1)","1.0.0",CMD_DOC_NONE,NULL,NULL,COMMAND_GROUP_CONNECTION,PING_History,PING_tips,pingCommand,-1,CMD_FAST|CMD_SENTINEL,ACL_CATEGORY_CONNECTION,.args=PING_Args},
+    {"quit","Close the connection","O(1)","1.0.0",CMD_DOC_NONE,NULL,NULL,COMMAND_GROUP_CONNECTION,QUIT_History,QUIT_tips,quitCommand,-1,CMD_ALLOW_BUSY|CMD_NOSCRIPT|CMD_LOADING|CMD_STALE|CMD_FAST|CMD_NO_AUTH,ACL_CATEGORY_CONNECTION},
+    {"reset","Reset the connection","O(1)","6.2.0",CMD_DOC_NONE,NULL,NULL,COMMAND_GROUP_CONNECTION,RESET_History,RESET_tips,resetCommand,1,CMD_NOSCRIPT|CMD_LOADING|CMD_STALE|CMD_FAST|CMD_NO_AUTH|CMD_ALLOW_BUSY,ACL_CATEGORY_CONNECTION},
+    {"select","Change the selected database for the current connection","O(1)","1.0.0",CMD_DOC_NONE,NULL,NULL,COMMAND_GROUP_CONNECTION,SELECT_History,SELECT_tips,selectCommand,2,CMD_LOADING|CMD_STALE|CMD_FAST,ACL_CATEGORY_CONNECTION,.args=SELECT_Args}
+
+    // ...
+}
 ```
 
-In the above snippet you'll notice that the `createIntConfig` invocation for `port` has `updatePort` as the last
-parameter, but the one for `databases` has `NULL`. This last parameter is what gets called when a config option is
-updated. If it is present, a config option can be updated on the fly.
+[src/commands.c][file-src-commands-c] is a **huge** file - almost 7,500 lines long. For each command, it stores details 
+like the name of the command, how many arguments it takes and which function implements the command. 
+
+This file is machine-generated by the [`utils/generate-command-code.py`][file-utils-generate-command-code] script. The 
+script takes files like [`src/commands/ping.json`][file-src-commands-ping-json] as input:
+
+[file-utils-generate-command-code]: https://github.com/redis/redis/blob/82b82035553cdbaf81983f91e0402edc8de764ab/utils/generate-command-code.py
+[file-src-commands-ping-json]: https://github.com/redis/redis/blob/82b82035553cdbaf81983f91e0402edc8de764ab/src/commands/ping.json
+[file-src-commands-c]: https://github.com/redis/redis/blob/82b82035553cdbaf81983f91e0402edc8de764ab/src/commands.c
+
+^^ referenced_code
+link:https://github.com/redis/redis/blob/82b82035553cdbaf81983f91e0402edc8de764ab/src/commands/ping.json
+highlighted_lines:8
+```c
+{
+    "PING": {
+        "summary": "Ping the server",
+        "complexity": "O(1)",
+        "group": "connection",
+        "since": "1.0.0",
+        "arity": -1,
+        "function": "pingCommand",
+        "command_flags": [
+            "FAST",
+            "SENTINEL"
+        ],
+        "acl_categories": [
+            "CONNECTION"
+        ],
+        "command_tips": [
+            "REQUEST_POLICY:ALL_SHARDS",
+            "RESPONSE_POLICY:ALL_SUCCEEDED"
+        ],
+        "arguments": [
+            {
+                "name": "message",
+                "type": "string",
+                "optional": true
+            }
+        ]
+    }
+}
+```
+
+That's all for this walkthrough! If you'd like to see more posts like these for specific parts of the Redis codebase, 
+please [let me know](https://twitter.com/RohitPaulK).
