@@ -1,4 +1,4 @@
-title: How the Redis PING command is implemented
+title: How the PING command is implemented
 
 introduction_markdown: |
   Let’s walk through the Redis source code and observe how the PING command is implemented.
