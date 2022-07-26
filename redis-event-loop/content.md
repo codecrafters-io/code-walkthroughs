@@ -12,15 +12,15 @@ The primary functions of Redis's event loop are to:
 1. Accept new client connections
 2. Respond to commands from existing connections
 
-We'll look at how the event loop data structure is initialized, how events are registered and how the event loop works
-internally.
+We'll look at how the event loop data structure is initialized, how event handlers are registered and how the event loop 
+waits for events and fires event handlers.
 
 ## Where is it initialized? 
 
 The Redis event loop is created inside [`initServer`][symbol-initServer] as part of the Redis boot process. 
 
 ^^ referenced_code
-link:https://github.com/redis/redis/blob/8203461120bf244e5c0576222c6aa5d986587bca/src/server.c#L2459
+link:https://github.com/redis/redis/blob/33bd8fb9810249a35d3bd9f5ddcb8a4f85a1c725/src/server.c#L2391
 highlighted_lines:4
 ```c
 void initServer(void) {
@@ -44,7 +44,7 @@ much since the inception of Redis in 2009, it was included in the [initial commi
 [`aeCreateEventLoop`][symbol-aeCreateEventLoop] initializes and returns the [`aeEventLoop`][symbol-aeEventLoop] data structure.
 
 ^^ referenced_code
-link:https://github.com/redis/redis/blob/99ab4236afb210dc118fad892210b9fbb369aa8e/src/ae.h#L98
+link:https://github.com/redis/redis/blob/33bd8fb9810249a35d3bd9f5ddcb8a4f85a1c725/src/ae.h#L99
 highlighted_lines:2
 ```c
 /* State of an event based program */
@@ -98,7 +98,7 @@ a new connection is available, and **(2)** when existing connections are ready t
 The event handler for new connections is registered early in the boot process: 
 
 ^^ referenced_code
-link:https://github.com/redis/redis/blob/99ab4236afb210dc118fad892210b9fbb369aa8e/src/ae.h#L98
+link:https://github.com/redis/redis/blob/d00b8af89265c501fb4a0cdd546702b90432a896/src/server.c#L2251
 highlighted_lines:7
 ```c
 /* Create an event handler for accepting new connections in TCP or TLS domain sockets.
@@ -122,7 +122,7 @@ established at that point. These events are set up after a connection is accepte
 is disconnected.
 
 ^^ referenced_code
-link:https://github.com/redis/redis/blob/99ab4236afb210dc118fad892210b9fbb369aa8e/src/ae.h#L98
+link:https://github.com/redis/redis/blob/d00b8af89265c501fb4a0cdd546702b90432a896/src/connection.c#L253
 highlighted_lines:11
 ```c
 /* Register a read handler, to be called when the connection is readable.
@@ -224,7 +224,7 @@ typedef struct aeEventLoop {
 } aeEventLoop;
 ```
 
-The `aeProcessEvents` function reads events from this field:
+The [`aeProcessEvents`][symbol-aeProcessEvents] function reads events from this field:
 
 ^^ referenced_code
 link:https://github.com/redis/redis/blob/99ab4236afb210dc118fad892210b9fbb369aa8e/src/ae.h#L98
@@ -257,7 +257,7 @@ int aeProcessEvents(aeEventLoop *eventLoop, int flags)
     }
 ```
 
-The `rfileProc` function call above is invoking the same function that was passed in the `aeCreateFileEvent` call:
+The `rfileProc` function call above is invoking the event handler function that was passed in to [`aeCreateFileEvent`][symbol-aeCreateFileEvent]:
 
 ^^ referenced_code
 link:https://github.com/redis/redis/blob/99ab4236afb210dc118fad892210b9fbb369aa8e/src/ae.h#L98
@@ -284,12 +284,13 @@ This loop runs ad-infinitum:
 2. invoke handlers for fired events
 3. .. repeat
 
-[file-ae-c]: https://google.com
-[initial-commit]: https://google.com
-[symbol-aeCreateEventLoop]: https://google.com
-[symbol-aeCreateFileEvent]: https://google.com
-[symbol-aeEventLoop]: https://google.com
-[symbol-initServer]: https://google.com
+[file-ae-c]: https://github.com/redis/redis/blob/33bd8fb9810249a35d3bd9f5ddcb8a4f85a1c725/src/ae.c
+[initial-commit]: https://github.com/redis/redis/commit/ed9b544e10b84cd43348ddfab7068b610a5df1f7
+[symbol-aeCreateEventLoop]: https://github.com/redis/redis/blob/33bd8fb9810249a35d3bd9f5ddcb8a4f85a1c725/src/ae.c#L67
+[symbol-aeCreateFileEvent]: https://github.com/redis/redis/blob/33bd8fb9810249a35d3bd9f5ddcb8a4f85a1c725/src/ae.c#L158
+[symbol-aeEventLoop]: https://github.com/redis/redis/blob/33bd8fb9810249a35d3bd9f5ddcb8a4f85a1c725/src/ae.h#L99
+[symbol-aeProcessEvents]: https://github.com/redis/redis/blob/d00b8af89265c501fb4a0cdd546702b90432a896/src/ae.c#L357
+[symbol-initServer]: https://github.com/redis/redis/blob/33bd8fb9810249a35d3bd9f5ddcb8a4f85a1c725/src/server.c#L2391
 [video-anatomy-of-a-redis-command]: https://youtu.be/rgE7tZ1yH80?t=129
 [video-jake-archibald]: https://www.youtube.com/watch?v=cCOL7MC4Pl0
 [video-philip-roberts]: https://www.youtube.com/watch?v=8aGhZQkoFbQ
