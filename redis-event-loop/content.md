@@ -5,10 +5,6 @@ we'd recommend looking at these links:
 - ["What the heck is the event loop anyway?"][video-philip-roberts] by Philip Roberts at JSConf EU
 - ["In the Loop"][video-jake-archibald] by Jake Archibald at JSConf.Asia
 
-[video-anatomy-of-a-redis-command]: https://youtu.be/rgE7tZ1yH80?t=129
-[video-philip-roberts]: https://www.youtube.com/watch?v=8aGhZQkoFbQ
-[video-jake-archibald]: https://www.youtube.com/watch?v=cCOL7MC4Pl0
-
 ## What is the Redis event loop responsible for?
 
 The primary functions of Redis's event loop are to: 
@@ -19,8 +15,6 @@ The primary functions of Redis's event loop are to:
 ## Where is it initialized? 
 
 The Redis event loop is created inside [`initServer`][function-initServer] as part of the Redis boot process. 
-
-[function-initServer]: https://google.com
 
 ^^ referenced_code
 link:https://github.com/redis/redis/blob/8203461120bf244e5c0576222c6aa5d986587bca/src/server.c#L2459
@@ -41,15 +35,10 @@ void initServer(void) {
 }
 ```
 
-[`aeCreateEventLoop`][function-aeCreateEventLoop] is a function defined in [`ae.c`][], an event loop library bundled with 
-Redis. This file hasn't changed much since the inception of Redis in 2009, it was included in the very [first commit][first-commit].
+[`aeCreateEventLoop`][function-aeCreateEventLoop] is a function defined in [`ae.c`][file-ae-c]. This file hasn't changed 
+much since the inception of Redis in 2009, it was included in the [initial commit][initial-commit].
 
 [`aeCreateEventLoop`][function-aeCreateEventLoop] initializes and returns the [`aeEventLoop`][symbol-aeEventLoop] data structure.
-
-[file-ae-c]: https://google.com
-[function-aeCreateEventLoop]: https://google.com
-[symbol-aeEventLoop]: https://google.com
-[first-commit]: https://google.com
 
 ^^ referenced_code
 link:https://github.com/redis/redis/blob/99ab4236afb210dc118fad892210b9fbb369aa8e/src/ae.h#L98
@@ -93,8 +82,23 @@ typedef struct aeEventLoop {
 } aeEventLoop;
 ```
 
-Keep these in mind, we'll get back to them in the upcoming sections. 
-
-Note that "creating an event loop"
-
 # How are the events registered?
+
+We've looked at how the `aeEventLoop` is initialized
+[`aeCreateEventLoop`][function-aeCreateEventLoop] only initializes the [`aeEventLoop`][symbol-aeEventLoop] data 
+structure, we still need to specify what events we want the event loop to wait on.
+
+This is done using the [`aeCreateFileEvent`][function-aeCreateFileEvent] function.
+
+[file-ae-c]: https://google.com
+[function-aeCreateEventLoop]: https://google.com
+[symbol-aeEventLoop]: https://google.com
+[initial-commit]: https://google.com
+[video-anatomy-of-a-redis-command]: https://youtu.be/rgE7tZ1yH80?t=129
+[video-philip-roberts]: https://www.youtube.com/watch?v=8aGhZQkoFbQ
+[video-jake-archibald]: https://www.youtube.com/watch?v=cCOL7MC4Pl0
+[function-initServer]: https://google.com
+[file-ae-c]: https://google.com
+[function-aeCreateEventLoop]: https://google.com
+[symbol-aeEventLoop]: https://google.com
+[initial-commit]: https://google.com
