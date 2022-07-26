@@ -1,0 +1,28 @@
+title: How the Redis event loop is implemented
+
+description_markdown: |
+  Let’s walk through the Redis source code and observe how the event loop is implemented.
+
+introduction_markdown: |
+  Redis is an open-source in-memory data store that can support thousands of concurrent clients and serve
+  [over 1 million requests per second][redis-perf-faq] on an average Linux system. Redis does this by using
+  an [event loop][wikipedia-event-loop] (similar to [JavaScript's event loop][javascript-event-loop]). In this 
+  walkthrough, we'll look at how Redis's event loop is implemented in the Redis source code.
+  
+  [redis-perf-faq]: https://redis.io/docs/getting-started/faq/#how-can-redis-use-multiple-cpus-or-cores
+  [wikipedia-event-loop]: https://en.wikipedia.org/wiki/Event_loop
+  [javascript-event-loop]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop
+
+conclusion_markdown: |
+  --- 
+  
+  That's all for this walkthrough! If you'd like to see more posts like these for specific parts of the Redis codebase,
+  please [let me know on Twitter](https://twitter.com/RohitPaulK).
+
+author:
+  avatar: "https://github.com/rohitpaulk.png"
+  name: "Paul Kuruvilla"
+  designation: "CTO, CodeCrafters"
+  website: "https://rohitpaulk.com"
+
+#hacker_news_url: ""
