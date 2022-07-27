@@ -2,7 +2,7 @@ title: How the PING command is implemented
 
 description_markdown: |
   Let’s walk through the Redis source code and observe how the PING command is implemented.
-  
+
 introduction_markdown: |
   Redis is an open-source in-memory data store. It exposes a set of commands for managing and working with data, like
   [`GET`][redis-get-command] and [`SET`][redis-set-command]. In this walkthrough, we'll look at how the [`PING`][redis-ping-command]
@@ -22,4 +22,4 @@ author:
   designation: "CTO, CodeCrafters"
   website: "https://rohitpaulk.com"
 
-hacker_news_url: "https://news.ycombinator.com/item?id=32131356"
+#hacker_news_url: "https://news.ycombinator.com/item?id=32131356"
