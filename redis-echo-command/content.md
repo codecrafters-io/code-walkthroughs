@@ -1,4 +1,4 @@
-The `ECHO` command is one of the simplest of all Redis commands. It returns the first argument back as a response. This 
+[`ECHO`][redis-echo-command] is one of the simplest of all Redis commands. It returns the first argument back as a response. This 
 command is often used to test if a connection is still alive, or to measure latency.
 
 The function that handles the `ECHO` command is [`echoCommand`][function-echoCommand]:
@@ -13,7 +13,8 @@ void echoCommand(client *c) {
 
 As expected, the implementation here is super simple - it just returns the first argument back as a response.
 
-The "Bulk" in `addReplyBulk` refers to "bulk strings", which is on the data types supported in the Redis protocol.
+The "Bulk" in `addReplyBulk` refers to ["Bulk Strings"][redis-protocol-bulk-strings], which is one the data types 
+supported in the [Redis protocol][redis-protocol].
 
 # Command Table
 
@@ -23,7 +24,7 @@ Definitions for all Redis commands are stored in [src/commands.c][file-src-comma
 
 ^^ referenced_code
 link:https://github.com/redis/redis/blob/82b82035553cdbaf81983f91e0402edc8de764ab/src/commands.c#L7184
-highlighted_lines:9
+highlighted_lines:8
 ```c
 /* Main command table */
 struct redisCommand redisCommandTable[] = {
@@ -79,7 +80,10 @@ highlighted_lines:8
 }
 ```
 
+[redis-echo-command]: https://redis.io/commands/echo
 [file-utils-generate-command-code]: https://github.com/redis/redis/blob/82b82035553cdbaf81983f91e0402edc8de764ab/utils/generate-command-code.py
 [file-src-commands-echo-json]: https://github.com/redis/redis/blob/82b82035553cdbaf81983f91e0402edc8de764ab/src/commands/echo.json
 [file-src-commands-c]: https://github.com/redis/redis/blob/82b82035553cdbaf81983f91e0402edc8de764ab/src/commands.c
 [function-echoCommand]: https://github.com/redis/redis/blob/4505eb18213c8da31c6dd39ba7cd36d3d01141a5/src/server.c#L4306
+[redis-protocol]: https://redis.io/docs/reference/protocol-spec/
+[redis-protocol-bulk-strings]: https://redis.io/docs/reference/protocol-spec/#resp-bulk-strings
