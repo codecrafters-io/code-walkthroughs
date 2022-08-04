@@ -1,0 +1,27 @@
+title: How the ECHO command is implemented
+
+description_markdown: |
+  Let’s walk through the Redis source code and observe how the ECHO command is implemented.
+
+introduction_markdown: |
+  Redis is an open-source in-memory data store. It exposes a set of commands for managing and working with data, like
+  [`GET`][redis-get-command] and [`SET`][redis-set-command]. In this walkthrough, we'll look at how the [`ECHO`][redis-echo-command]
+  command is implemented in the Redis source code.
+  
+  [redis-echo-command]: https://redis.io/commands/echo
+  [redis-get-command]: https://redis.io/commands/get
+  [redis-set-command]: https://redis.io/commands/set
+
+conclusion_markdown: |
+  --- 
+  
+  That's all for this walkthrough! If you'd like to see more posts like these for specific parts of the Redis codebase,
+  please [let me know on Twitter](https://twitter.com/RohitPaulK).
+
+author:
+  avatar: "https://github.com/rohitpaulk.png"
+  name: "Paul Kuruvilla"
+  designation: "CTO, CodeCrafters"
+  website: "https://rohitpaulk.com"
+
+#hacker_news_url: "https://news.ycombinator.com/item?id=32131356"
