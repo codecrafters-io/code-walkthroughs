@@ -1,0 +1,26 @@
+title: How the git init command is implemented
+
+description_markdown: |
+  Let’s walk through the Git source code and observe how the git init command is implemented.
+
+introduction_markdown: |
+  You've probably used [Git](https://git-scm.com/). It's the most popular version control system. [`git init`][git-init-command] is the 
+  command that Git exposes to create a new Git repository. In this walkthrough, we'll look at how this command is 
+  implemented in the [Git source code][git-source-code].
+  
+  [git-init-command]: https://git-scm.com/docs/git-init
+  [git-source-code]: https://github.com/git/git
+
+conclusion_markdown: |
+  --- 
+  
+  That's all for this walkthrough! If you'd like to see more posts like these for specific parts of the Git codebase,
+  please [let me know on Twitter](https://twitter.com/RohitPaulK).
+
+author:
+  avatar: "https://github.com/rohitpaulk.png"
+  name: "Paul Kuruvilla"
+  designation: "CTO, CodeCrafters"
+  website: "https://rohitpaulk.com"
+
+#hacker_news_url: "https://news.ycombinator.com/item?id=32131356"
