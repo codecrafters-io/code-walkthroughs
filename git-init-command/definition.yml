@@ -16,7 +16,7 @@ conclusion_markdown: |
   That's all for this walkthrough! Hopefully that helped shine some light on how Git works internally. If you'd like to 
   see more posts like these for specific parts of the Git codebase, please [let me know on Twitter](https://twitter.com/RohitPaulK).
   
-  If you're looking to master Git internals & improve your programming skills while you're at, you should check out our [Build Your Own Git](https://app.codecrafters.io/courses/git/overview) 
+  If you're looking to master Git internals & improve your programming skills while you're at it, you should check out our [Build Your Own Git](https://app.codecrafters.io/courses/git/overview) 
   challenge!
 
 author:
