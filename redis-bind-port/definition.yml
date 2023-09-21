@@ -1,9 +1,9 @@
 title: How Redis binds to a port
 
-description_markdown: |
+description_markdown: |-
   Let’s walk through the Redis source code and observe how a Redis server binds to a port as part of the boot process.
 
-introduction_markdown: |
+introduction_markdown: |-
   Redis is an open-source in-memory data store. It exposes a set of commands for managing and working with data, like
   [`GET`][redis-get-command] and [`SET`][redis-set-command]. In this walkthrough, we'll dive into Redis's source code
   and look at how a Redis server binds to a port as part of the boot process.
@@ -11,7 +11,7 @@ introduction_markdown: |
   [redis-get-command]: https://redis.io/commands/get
   [redis-set-command]: https://redis.io/commands/set
 
-conclusion_markdown: |
+conclusion_markdown: |-
   That's all for this walkthrough! If you'd like to see more posts like these for specific parts of the Redis codebase,
   please [let me know on Twitter](https://twitter.com/RohitPaulK).
 

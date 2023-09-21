@@ -1,16 +1,16 @@
 title: How the git init command is implemented
 
-description_markdown: |
+description_markdown: |-
   Let’s walk through the Git source code and observe how the git init command is implemented.
 
-introduction_markdown: |
+introduction_markdown: |-
   You've probably used [Git](https://git-scm.com/). It's the most popular version control system. In this walkthrough, 
   we'll look at how the [`git init`][git-init-command] command is implemented in the [Git source code][git-source-code].
   
   [git-init-command]: https://git-scm.com/docs/git-init
   [git-source-code]: https://github.com/git/git
 
-conclusion_markdown: |
+conclusion_markdown: |-
   --- 
   
   That's all for this walkthrough! Hopefully that helped shine some light on how Git works internally. If you'd like to 
